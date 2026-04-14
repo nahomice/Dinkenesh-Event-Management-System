@@ -36,6 +36,7 @@ import { SupportPage } from "./pages/info/SupportPage";
 import { TermsPage } from "./pages/info/TermsPage";
 import { PrivacyPage } from "./pages/info/PrivacyPage";
 import { RefundPage } from "./pages/info/RefundPage";
+import { RouteSeo } from "./components/common/RouteSeo";
 import { useAuth } from "./contexts/AuthContext";
 
 function ProtectedRoleRoute({ children, allowedRoleIds }) {
@@ -55,6 +56,7 @@ function ProtectedRoleRoute({ children, allowedRoleIds }) {
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
+      <RouteSeo />
       <Navbar />
       <main className="flex-grow">
         <Routes>

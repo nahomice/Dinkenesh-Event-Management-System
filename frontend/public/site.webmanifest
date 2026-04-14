@@ -1,0 +1,22 @@
+{
+  "name": "Dinkenesh Event Management System",
+  "short_name": "DEMS",
+  "description": "Discover, manage, and operate events with secure ticketing and role-based workflows.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#166534",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

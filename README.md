@@ -1,109 +1,83 @@
-# DEMS - Dinkenesh Event Management System
+# Dinkenesh Event Management System (DEMS)
 
-DEMS is a full-stack event management and ticketing platform. It supports the full event lifecycle for attendees, organizers, staff/security teams, and platform admins.
+DEMS is a full-stack platform for managing the complete event lifecycle in Ethiopia, from discovery and ticket purchase to organizer operations, staff check-in, moderation, and payouts.
 
-The repository contains a React + Vite frontend and an Express + Prisma backend, with PostgreSQL as the primary database and Chapa integration for payments.
+This repository contains:
+- A React + Vite frontend for attendees, organizers, staff, and admins.
+- An Express + Prisma backend API powered by PostgreSQL.
+- SQL and schema assets for database operations and migration support.
 
-## Collaboration Summary
+## Core Capabilities
 
-- Total contributors in git history: **30**
-- Collaboration groups defined in [Instruction.md](Instruction.md): **3**
-- Group branches:
-	- `group-a-frontdoor` (frontend attendee journey and auth entry flows)
-	- `group-b-control-room` (organizer/admin operations and finance controls)
-	- `group-c-engine-room` (moderation, check-in engine, reviews, and platform core)
+### Attendee
+- Register and authenticate.
+- Discover and filter events.
+- View detailed event pages.
+- Purchase tickets and verify payment.
+- Manage saved and purchased tickets.
 
-## What The Project Covers
+### Organizer
+- Submit organizer application and access organizer flows.
+- Create and manage events.
+- Manage staff assignments.
+- Monitor analytics and export CSV reports.
+- Track platform fees and payout settings.
 
-### Attendee Experience
-- Account registration and login
-- Event discovery, filtering, and featured events
-- Event detail pages with reviews and reporting
-- Checkout and payment verification
-- Digital ticket viewing and ticket list management
+### Admin and Staff Operations
+- Review organizer approvals.
+- Manage categories, events, and users.
+- Handle check-in and scanning workflows.
+- Process moderation reports and appeals.
+- Monitor platform-level operational metrics.
 
-### Organizer Experience
-- Organizer signup and dashboard
-- Event creation and management
-- Staff assignment and management
-- Event analytics and CSV export
-- Payout and platform fee workflows
+## High-Level Architecture
 
-### Admin / Staff / Security Operations
-- Organizer approvals and admin management
-- Event and category administration
-- Staff dashboard and QR scanning/check-in
-- Moderation pipeline for reports, bans, and appeals
-- Notification handling and status workflows
+- Frontend: Browser-based SPA served by Vite build output.
+- Backend: REST API with role-aware authorization and validation layers.
+- Data: PostgreSQL modeled via Prisma schema.
+- Payments: Chapa integration for checkout and verification flows.
+- Communication: Template-based transactional email service.
 
 ## Tech Stack
 
 ### Frontend
 - React 19
-- Vite
-- React Router
+- Vite 8
+- React Router 7
 - Tailwind CSS
-- Recharts (analytics)
-- Leaflet + React Leaflet (maps)
-- jsQR (scanner support)
+- Recharts
+- Leaflet and React Leaflet
+- jsQR
 
 ### Backend
-- Node.js + Express 5
-- Prisma ORM + PostgreSQL
-- JWT authentication and role-based authorization
-- Chapa payment gateway integration
-- Nodemailer template mail system
-- Optional Redis hooks in configuration
-
-## Backend Scope (Current Codebase)
-
-- Route modules: **16**
-- Controllers: **13**
-- Services: **4**
-- Middleware modules: **4**
-- Mail templates: **11**
-- Seed datasets: **12**
-
-Main API domains include:
-- Auth, Events, Categories, Tickets
-- Staff scanning/check-in
-- Reviews and replies
-- Notifications
-- Payments, payouts, and platform fees
-- Organizer/admin analytics
-- Moderation (reports, bans, appeals)
-
-## Frontend Scope (Current Codebase)
-
-- Page modules: **35**
-- Component modules: **12**
-- Context modules: **1** (`AuthContext`)
-- Utility modules: **2**
-
-The frontend exposes dedicated route experiences for public visitors, attendees, organizers, staff/security, and admins.
-
-## Data Model Snapshot
-
-The Prisma schema includes core models for:
-- Identity and roles (`Role`, `User`, `OrganizerProfile`)
-- Event catalog and ticketing (`EventCategory`, `Event`, `TicketType`, `DigitalTicket`)
-- Commerce (`Order`, `OrderItem`, `PlatformFeePayment`, `Payout`)
-- Operations (`StaffMember`, `CheckInLog`, `Notification`)
-- Trust and moderation (`Review`, `ReviewReply`, `Report`, `Ban`, `Appeal`)
+- Node.js
+- Express 5
+- Prisma 7
+- PostgreSQL
+- JWT authentication
+- Nodemailer
+- Optional Redis queue hooks
 
 ## Repository Structure
 
 ```text
 .
-├─ backend/        # Express API, Prisma schema, services, seed scripts
-├─ frontend/       # React app (Vite), pages/components/contexts
-├─ database/       # SQL scripts and schema snapshots
-└─ Instruction.md  # Collaboration and commit matrix reference
+├─ backend/         # Express API, Prisma schema, controllers, routes, services
+├─ frontend/        # React application and static assets
+├─ database/        # SQL scripts, merged schema snapshots, and patches
+└─ vercel.json      # SPA route rewrite configuration
 ```
 
-## Local Development
+## Prerequisites
 
-### 1) Backend
+- Node.js 18+
+- npm 9+
+- PostgreSQL 14+
+- Redis (optional, only if queue-based flows are enabled)
+
+## Quick Start
+
+### 1) Backend Setup
 
 ```bash
 cd backend
@@ -114,10 +88,10 @@ npm run prisma:generate
 npm run dev
 ```
 
-Backend default URL: `http://localhost:5000`
-Health endpoint: `http://localhost:5000/health`
+Backend default URL: http://localhost:5000  
+Health endpoint: http://localhost:5000/health
 
-### 2) Frontend
+### 2) Frontend Setup
 
 ```bash
 cd frontend
@@ -125,18 +99,94 @@ npm install
 npm run dev
 ```
 
-Frontend default URL: `http://localhost:5173`
+Frontend default URL: http://localhost:5173
 
-Set frontend environment variables as needed:
+## Environment Variables
+
+### Backend Required Variables
+
+At minimum, configure these in backend/.env:
+- PORT
+- NODE_ENV
+- DATABASE_URL
+- JWT_SECRET
+- JWT_EXPIRE
+- FRONTEND_URL
+- CORS_ORIGINS
+
+Also configure integrations as needed:
+- CHAPA_SECRET_KEY and CHAPA_PUBLIC_KEY
+- CHAPA_WEBHOOK_SECRET
+- EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_FROM
+- REDIS_HOST and REDIS_PORT (if using Redis-backed workflows)
+
+### Frontend Variables
+
+Set these in frontend/.env files as needed:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
 VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
 VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_key
 ```
 
-## Notes
+## Database and Seed Workflow
 
-- The collaboration plan and contributor allocation are documented in [Instruction.md](Instruction.md).
-- Backend package metadata describes the project as "Dinkenesh Event Management System Backend".
-- The current git history confirms **30 unique contributors**.
+From backend:
+
+```bash
+npm run prisma:validate
+npm run prisma:generate
+npm run seed:demo
+```
+
+Useful Prisma commands:
+
+```bash
+npm run prisma:format
+npm run prisma:pull
+npm run prisma:studio
+```
+
+## Script Reference
+
+### Backend Scripts
+- npm run dev
+- npm run start
+- npm run test
+- npm run seed:demo
+- npm run prisma:validate
+- npm run prisma:generate
+- npm run prisma:format
+- npm run prisma:pull
+- npm run prisma:studio
+- npm run prisma:studio:open
+
+### Frontend Scripts
+- npm run dev
+- npm run build
+- npm run seo:sitemap
+- npm run lint
+- npm run preview
+
+## Deployment Notes
+
+- The repository includes Vercel rewrite rules for SPA routing.
+- Ensure the frontend API base URL points to a deployed backend.
+- Ensure backend CORS settings include the deployed frontend domain.
+- Keep secrets in environment variables only, never in source control.
+
+## Security and Operational Notes
+
+- JWT and role checks are enforced in backend middleware.
+- Rate limiting and request validation middleware are available.
+- Moderation and reporting flows are implemented in dedicated controllers and routes.
+
+## Contributors
+
+The repository history reflects broad collaboration across frontend, backend, moderation, and operations features.
+
+## License
+
+MIT

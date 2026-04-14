@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /organizer/
+Disallow: /staff/
+Disallow: /security/
+Disallow: /profile
+Disallow: /checkout
+Disallow: /saved-tickets
+Disallow: /my-tickets
+Disallow: /payment/
+
+Sitemap: https://dinkenesh-event-management-system.vercel.app/sitemap.xml

@@ -35,6 +35,32 @@ import {
 import { eventAPI, moderationAPI } from "../../api/client";
 import { useAuth } from "../../contexts/AuthContext";
 import { ReviewSection } from "../../components/groupC/ReviewSection";
+import { setSeoMetadata, setJsonLd, removeJsonLd } from "../../utils/seo";
+import { DEFAULT_IMAGE, SITE_NAME, SITE_URL } from "../../seo/routes";
+
+const DEFAULT_EVENT_DESCRIPTION =
+  `View event details, venue information, ticket tiers, and secure checkout on ${SITE_NAME}.`;
+const DEFAULT_EVENT_IMAGE = DEFAULT_IMAGE;
+
+function summarizeDescription(description) {
+  const normalized = (description || DEFAULT_EVENT_DESCRIPTION)
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (normalized.length <= 160) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, 157)}...`;
+}
+
+function buildCanonicalEventUrl(eventId) {
+  if (!eventId) {
+    return `${SITE_URL}/event`;
+  }
+
+  return `${SITE_URL}/event/${eventId}`;
+}
 
 export function EventDetailPage() {
   const { eventId } = useParams();
@@ -260,6 +286,106 @@ export function EventDetailPage() {
 
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const fullAddress = `${event?.venue_name ? event.venue_name + ", " : ""}${event?.address_line1 ? event.address_line1 + ", " : ""}${event?.city || "Addis Ababa"}, Ethiopia`;
+  const canonicalEventUrl = buildCanonicalEventUrl(eventId);
+  const eventDescription = summarizeDescription(event?.description);
+  const eventTitle = !loading && !event
+    ? `Event Not Found | ${SITE_NAME}`
+    : event?.title
+      ? `${event.title} | ${SITE_NAME}`
+      : `Event Details | ${SITE_NAME}`;
+  const eventImage = event?.banner_url || DEFAULT_EVENT_IMAGE;
+  const eventRobots = !loading && !event ? "noindex, follow" : "index, follow";
+
+  const eventOffers = ticketTypes
+    .map((ticket) => {
+      const ticketPrice = Number(ticket.price);
+
+      if (!Number.isFinite(ticketPrice)) {
+        return null;
+      }
+
+      return {
+        "@type": "Offer",
+        price: ticketPrice,
+        priceCurrency: "ETB",
+        availability:
+          Number(ticket.remaining_quantity) > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/SoldOut",
+        url: canonicalEventUrl,
+      };
+    })
+    .filter(Boolean);
+
+  const eventStructuredData = event
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: event.title,
+        description: eventDescription,
+        image: [eventImage],
+        startDate: event.start_datetime || undefined,
+        endDate: event.end_datetime || undefined,
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        eventStatus: "https://schema.org/EventScheduled",
+        location: {
+          "@type": "Place",
+          name: event.venue_name || event.city || "Ethiopia",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: event.address_line1 || undefined,
+            addressLocality: event.city || "Addis Ababa",
+            addressCountry: "ET",
+          },
+        },
+        organizer: event.organizer_name
+          ? {
+              "@type": "Organization",
+              name: event.organizer_name,
+            }
+          : undefined,
+        url: canonicalEventUrl,
+        offers: eventOffers.length > 0 ? eventOffers : undefined,
+      }
+    : null;
+  const eventStructuredDataJson = eventStructuredData
+    ? JSON.stringify(eventStructuredData)
+    : null;
+
+  useEffect(() => {
+    setSeoMetadata({
+      title: eventTitle,
+      description: eventDescription,
+      robots: eventRobots,
+      canonicalUrl: canonicalEventUrl,
+      ogType: event ? "event" : "website",
+      ogTitle: eventTitle,
+      ogDescription: eventDescription,
+      ogUrl: canonicalEventUrl,
+      ogImage: eventImage,
+      twitterTitle: eventTitle,
+      twitterDescription: eventDescription,
+      twitterImage: eventImage,
+    });
+
+    if (eventStructuredDataJson) {
+      setJsonLd("event-detail-jsonld", eventStructuredDataJson);
+    } else {
+      removeJsonLd("event-detail-jsonld");
+    }
+
+    return () => {
+      removeJsonLd("event-detail-jsonld");
+    };
+  }, [
+    canonicalEventUrl,
+    event,
+    eventDescription,
+    eventImage,
+    eventRobots,
+    eventStructuredDataJson,
+    eventTitle,
+  ]);
 
   if (loading) {
     return (

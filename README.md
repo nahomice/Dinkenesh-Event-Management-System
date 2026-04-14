@@ -26,6 +26,7 @@ This repository contains:
 ### Admin and Staff Operations
 - Review organizer approvals.
 - Manage categories, events, and users.
+-Secure Check-in Engine: High-performance QR scanning and validation logic (POST /api/v1/validate).
 - Handle check-in and scanning workflows.
 - Process moderation reports and appeals.
 - Monitor platform-level operational metrics.

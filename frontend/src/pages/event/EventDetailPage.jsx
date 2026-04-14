@@ -258,6 +258,7 @@ export function EventDetailPage() {
     window.open(mapsUrl, "_blank");
   };
 
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const fullAddress = `${event?.venue_name ? event.venue_name + ", " : ""}${event?.address_line1 ? event.address_line1 + ", " : ""}${event?.city || "Addis Ababa"}, Ethiopia`;
 
   if (loading) {
@@ -610,21 +611,36 @@ export function EventDetailPage() {
                 </div>
 
                 {/* Google Maps Embed */}
-                <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
-                  <iframe
-                    width="100%"
-                    height="350"
-                    frameBorder="0"
-                    style={{ border: 0 }}
-                    src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(fullAddress)}`}
-                    allowFullScreen
-                    title="Event Location Map"
-                  />
-                  <div className="p-3 bg-gray-50 text-center text-xs text-gray-500">
-                    <MapPin className="size-3 inline mr-1" />
-                    {event.venue_name || event.city}
+                {googleMapsApiKey ? (
+                  <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
+                    <iframe
+                      width="100%"
+                      height="350"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://www.google.com/maps/embed/v1/place?key=${googleMapsApiKey}&q=${encodeURIComponent(fullAddress)}`}
+                      allowFullScreen
+                      title="Event Location Map"
+                    />
+                    <div className="p-3 bg-gray-50 text-center text-xs text-gray-500">
+                      <MapPin className="size-3 inline mr-1" />
+                      {event.venue_name || event.city}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="rounded-xl shadow-lg border border-gray-200 bg-gray-50 p-6 text-center">
+                    <p className="text-sm text-gray-600 mb-3">
+                      Google Maps preview is unavailable because the API key is
+                      not configured.
+                    </p>
+                    <button
+                      onClick={openGoogleMaps}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                    >
+                      Open in Google Maps
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
